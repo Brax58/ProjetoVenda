@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 
 namespace ProjetoVendas.Service
 {
-    [ApiController]
     public class ProdutoService
     {
         private readonly AppDbContext _appDbContext;
@@ -21,19 +20,17 @@ namespace ProjetoVendas.Service
 
         public async Task<Guid> Adicionar(AdicionarProduto adicionarProduto)
         {
-            try
-            {
+            bool validarProduto = ValidarCaracteristicas(adicionarProduto);
+            
+            if (!validarProduto) {
+                throw new Exception("Opa! Algo deu errado no momento de inserir o produto!");
+            }
                 var produto = new Produto(adicionarProduto.Descricao,adicionarProduto.Valor,adicionarProduto.QuantidadeNoStoque);
 
                 await _appDbContext.Produtos.AddAsync(produto);
                 await _appDbContext.SaveChangesAsync();
 
                 return produto.Id;
-            }
-            catch (Exception exception)
-            {
-                throw new Exception("Opa! Algo deu errado no momento de inserir o produto: " + exception.Message);
-            }
         }
 
         public async Task Atualizar(AtualizarProduto atualizarProduto)
@@ -42,8 +39,8 @@ namespace ProjetoVendas.Service
             {
                 var produto = await _appDbContext.Produtos.FirstOrDefaultAsync(x => x.Id == atualizarProduto.Id);
                 _appDbContext.Entry(produto).State = EntityState.Modified;
+                AtualizarProduto(produto,atualizarProduto);
                 await Task.FromResult(_appDbContext.Set<Produto>().Update(produto));
-
                 await _appDbContext.SaveChangesAsync();
             }
             catch (Exception exception)
@@ -90,6 +87,19 @@ namespace ProjetoVendas.Service
             {
                 throw new Exception("Ops! Algo deu errado no momento de excluir o produto: " + exception.Message);
             }
+        }
+
+        public bool ValidarCaracteristicas(AdicionarProduto adicionarProduto) {
+
+            if (adicionarProduto.Descricao.Length <= 200 && adicionarProduto.Valor >= 0 && adicionarProduto.QuantidadeNoStoque > 0)
+                return true;
+            else
+                return false;
+
+        }
+
+        public void AtualizarProduto(Produto produto,AtualizarProduto atualizarProduto) {
+            produto.AddNewProduto(atualizarProduto.Descricao,atualizarProduto.Valor, atualizarProduto.QuantidadeNoEstoque);
         }
     }
 }

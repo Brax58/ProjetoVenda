@@ -30,9 +30,13 @@ namespace ProjetoVendas.Controllers
             // recebo a requisição e passo a responsabilidade de fazer a lógica de adicionar para outra classe (Princípio da Responsabilidade única (SOLID))
             // os metodos do controller não tem de ter muito código. basicamente uma linha que repassa a requisição pra outra classe fazer o cadastro
             // e outra linha que retorna a reposta para o frontend
-            Guid id = await new UsuarioService(_appDbContext).Adicionar(adicionarUsuario);
-
-            return CreatedAtAction(nameof(Obter), id);
+            try { 
+                Guid id = await new UsuarioService(_appDbContext).Adicionar(adicionarUsuario);
+                return CreatedAtAction(nameof(Obter), id);
+            }
+            catch {
+                return NotFound();
+            }
         }
 
         [HttpPut("{id}")]
@@ -41,10 +45,14 @@ namespace ProjetoVendas.Controllers
             // recebo a requisição e passo a responsabilidade de fazer a lógica de adicionar para outra classe (Princípio da Responsabilidae única (SOLID))
             // os metodos do controller não tem de ter muito código. basicamente uma linha que repassa a requisição pra outra classe fazer a trativa
             // e outra linha que retorna a reposta para o frontend
-            atualizarUsuario.Id = id;
-            await new UsuarioService(_appDbContext).Atualizar(atualizarUsuario);
+            try { 
+                atualizarUsuario.ObterId(id);
+                await new UsuarioService(_appDbContext).Atualizar(atualizarUsuario);
+                return NoContent();
 
-            return NoContent();
+            } catch {
+                return NotFound();
+            }
         }
 
         [HttpDelete("{id}")]
@@ -53,9 +61,14 @@ namespace ProjetoVendas.Controllers
             // recebo a requisição e passo a responsabilidade de fazer a lógica de adicionar para outra classe (Princípio da Responsabilidae única (SOLID))
             // os metodos do controller não tem de ter muito código. basicamente uma linha que repassa a requisição pra outra classe fazer a trativa
             // e outra linha que retorna a reposta para o frontend
-            await new UsuarioService(_appDbContext).Remover(id);
 
-            return NoContent();
+            try { 
+                await new UsuarioService(_appDbContext).Remover(id);
+                return NoContent();
+            } 
+            catch {
+                return NotFound();
+            }
         }
 
         [HttpGet]
@@ -63,9 +76,15 @@ namespace ProjetoVendas.Controllers
         {
             // recebo a requisição e passo a responsabilidade de buscar todos usuários cadastrados para outra classe
             // metodos do controller não tem de ter lógica, basicamente uma linha que repassa a requisição pra outra classe fazer a trativa
-            var usuarios = await new UsuarioService(_appDbContext).ObterTodos();
-
-            return Ok(usuarios);
+            try
+            {
+                var usuarios = await new UsuarioService(_appDbContext).ObterTodos();
+                return Ok(usuarios);
+            }
+            catch (Exception)
+            {
+                return NotFound();
+            }
         }
 
         [HttpGet("{id}")]
@@ -73,9 +92,15 @@ namespace ProjetoVendas.Controllers
         {
             // recebo a requisição e passo a responsabilidade de buscar o usuário cadastrado para outra classe
             // metodos do controller não tem de ter lógica, basicamente uma linha que repassa a requisição pra outra classe fazer a trativa
+            try
+            {
             var usuario = await new UsuarioService(_appDbContext).ObterPorId(id);
-
             return Ok(usuario);
+            }
+            catch (Exception)
+            {
+                return NotFound();
+            }
         }
     }
 }

@@ -14,5 +14,12 @@ namespace ProjetoVendas.Entities
             Valor = valor;
             QuantidadeNoStoque = quantidadeNoStoque;
         }
+
+        internal void AddNewProduto(string descricao, decimal valor, int quantidadeNoStoque)
+        {
+            Descricao = descricao;
+            Valor = valor;
+            QuantidadeNoStoque = quantidadeNoStoque;
+        }
     }
 }

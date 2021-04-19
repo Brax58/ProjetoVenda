@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ProjetoVendas.Entities;
 using ProjetoVendas.Infra;
 using ProjetoVendas.Resquest.Usuario;
@@ -19,18 +20,18 @@ namespace ProjetoVendas.Service
 
         public async Task<Guid> Adicionar(AdicionarUsuario adicionarUsuario)
         {
-            try
+            bool ValidarUsuario = ValidarCaracteristicas(adicionarUsuario);
+            if (!ValidarUsuario)
             {
-                var usuario = new Usuario(adicionarUsuario.Nome, adicionarUsuario.Email, adicionarUsuario.Cpf, adicionarUsuario.DataDeNascimento);
-                await _appDbContext.Usuarios.AddAsync(usuario);
-                await _appDbContext.SaveChangesAsync();
-
-                return usuario.Id;
-            } 
-            catch (Exception exception)
-            {
-                throw new Exception("Opa! Algo deu errado no momento de inserir o produto: " + exception.Message);
+                throw new Exception("Opa! Algo deu errado no momento de inserir o produto!");
             }
+
+            var usuario = new Usuario(adicionarUsuario.Nome, adicionarUsuario.Email, adicionarUsuario.Cpf, adicionarUsuario.DataDeNascimento);
+
+            await _appDbContext.Usuarios.AddAsync(usuario);
+            await _appDbContext.SaveChangesAsync();
+
+            return usuario.Id;
         }
 
         /*Se o usuário não for encontrado pelo ID(GUID) recebido, retornar 404 ou 204 para atualizado com sucesso.
@@ -41,13 +42,9 @@ namespace ProjetoVendas.Service
             try
             {
                 var usuario = await _appDbContext.Usuarios.FirstOrDefaultAsync(x => x.Id == atualizarUsuario.Id);
-                if (usuario == null) {
-                    return NotFound();
-                }
-
                 _appDbContext.Entry(usuario).State = EntityState.Modified;
+                AtualizarUsuario(usuario,atualizarUsuario);
                 await Task.FromResult(_appDbContext.Set<Usuario>().Update(usuario));
-
                 await _appDbContext.SaveChangesAsync();
             }
             catch (Exception exception)
@@ -94,6 +91,23 @@ namespace ProjetoVendas.Service
             {
                 throw new Exception("Ops! Algo deu errado no momento de remover o usuário: " + exception.Message);
             }
+        }
+
+        private bool ValidarCaracteristicas(AdicionarUsuario adicionarUsuario)
+        {
+            if (adicionarUsuario.Nome.Length <= 60 && adicionarUsuario.Nome.Length > 0
+                && adicionarUsuario.Email.Length > 0 && adicionarUsuario.Email.Contains("@")
+                && adicionarUsuario.Email.Contains(".com") && adicionarUsuario.DataDeNascimento.Length > 0
+                && adicionarUsuario.DataDeNascimento.Contains("/") && adicionarUsuario.Cpf.Length > 0
+                && !adicionarUsuario.Cpf.Contains(".") && !adicionarUsuario.Cpf.Contains("-"))
+                return true;
+            else
+                return false;
+        }
+
+        private void AtualizarUsuario(Usuario usuario, AtualizarUsuario atualizarUsuario)
+        {
+            usuario.AddNewUsuario(atualizarUsuario.Nome, atualizarUsuario.Ativo);
         }
     }
 }

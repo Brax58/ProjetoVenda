@@ -17,6 +17,9 @@ namespace ProjetoVendas.Entities.Base
             Ativo = true;
         }
 
+        internal void SetAtivo(bool ativo) {
+            Ativo = ativo;
+        }
 
     }
 }

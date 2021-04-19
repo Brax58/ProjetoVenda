@@ -11,7 +11,7 @@ namespace ProjetoVendas.Entities
     {
         public string Nome{ get; private set; }
         public string Email{ get; private set; }
-        public string DataDeNascimento{ get; set; }
+        public string DataDeNascimento{ get; private set; }
         public string Cpf { get; private set; }
 
         
@@ -21,6 +21,13 @@ namespace ProjetoVendas.Entities
             Email = email;
             Cpf = cpf;
             DataDeNascimento = dataDeNascimento;
+        }
+
+
+        internal void AddNewUsuario(string nome,bool ativo)
+        {
+            Nome = nome;
+            SetAtivo(ativo);
         }
 
     }

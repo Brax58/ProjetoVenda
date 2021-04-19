@@ -11,8 +11,13 @@ namespace ProjetoVendas.Resquest.Usuario
         com EXCEÇÃO da Data de cadastro e do Email, estas propriedades não poderão ser atualizadas pelo usuário 
        em nenhum momento*/
 
-        public Guid Id { get; set; }
+        public Guid Id { get; private set; }
         public string Nome{ get; set; }
         public bool Ativo { get; set; }
+
+        public void ObterId(Guid id)
+        {
+            Id = id;
+        }
     }
 }

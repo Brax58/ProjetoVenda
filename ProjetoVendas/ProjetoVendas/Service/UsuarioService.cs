@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using ProjetoVendas.Entities;
 using ProjetoVendas.Infra;
 using ProjetoVendas.Resquest.Usuario;
+using ProjetoVendas.Service.AtualizacaoDasEntidades;
+using ProjetoVendas.Service.Validacao;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -20,8 +22,11 @@ namespace ProjetoVendas.Service
 
         public async Task<Guid> Adicionar(AdicionarUsuario adicionarUsuario)
         {
-            bool ValidarUsuario = ValidarCaracteristicas(adicionarUsuario);
-            if (!ValidarUsuario)
+            var validar = new ValidarUsuario();
+            
+            bool validarUsuario = validar.ValidarCaracteristicas(adicionarUsuario);
+
+            if (!validarUsuario)
             {
                 throw new Exception("Opa! Algo deu errado no momento de inserir o produto!");
             }
@@ -43,7 +48,10 @@ namespace ProjetoVendas.Service
             {
                 var usuario = await _appDbContext.Usuarios.FirstOrDefaultAsync(x => x.Id == atualizarUsuario.Id);
                 _appDbContext.Entry(usuario).State = EntityState.Modified;
-                AtualizarUsuario(usuario,atualizarUsuario);
+
+                var atualizarU = new AtualizacaoDoUsuario();
+                atualizarU.AtualizarUsuario(usuario,atualizarUsuario);
+
                 await Task.FromResult(_appDbContext.Set<Usuario>().Update(usuario));
                 await _appDbContext.SaveChangesAsync();
             }
@@ -91,23 +99,6 @@ namespace ProjetoVendas.Service
             {
                 throw new Exception("Ops! Algo deu errado no momento de remover o usuário: " + exception.Message);
             }
-        }
-
-        private bool ValidarCaracteristicas(AdicionarUsuario adicionarUsuario)
-        {
-            if (adicionarUsuario.Nome.Length <= 60 && adicionarUsuario.Nome.Length > 0
-                && adicionarUsuario.Email.Length > 0 && adicionarUsuario.Email.Contains("@")
-                && adicionarUsuario.Email.Contains(".com") && adicionarUsuario.DataDeNascimento.Length > 0
-                && adicionarUsuario.DataDeNascimento.Contains("/") && adicionarUsuario.Cpf.Length > 0
-                && !adicionarUsuario.Cpf.Contains(".") && !adicionarUsuario.Cpf.Contains("-"))
-                return true;
-            else
-                return false;
-        }
-
-        private void AtualizarUsuario(Usuario usuario, AtualizarUsuario atualizarUsuario)
-        {
-            usuario.AddNewUsuario(atualizarUsuario.Nome, atualizarUsuario.Ativo);
         }
     }
 }

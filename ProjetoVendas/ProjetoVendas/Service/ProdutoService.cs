@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using ProjetoVendas.Entities;
 using ProjetoVendas.Infra;
 using ProjetoVendas.Resquest.Produto;
+using ProjetoVendas.Service.AtualizacaoDasEntidades;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -20,7 +21,9 @@ namespace ProjetoVendas.Service
 
         public async Task<Guid> Adicionar(AdicionarProduto adicionarProduto)
         {
-            bool validarProduto = ValidarCaracteristicas(adicionarProduto);
+            ValidarProduto validar = new ValidarProduto();
+
+            bool validarProduto = validar.ValidarCaracteristicaProduto(adicionarProduto);
             
             if (!validarProduto) {
                 throw new Exception("Opa! Algo deu errado no momento de inserir o produto!");
@@ -39,7 +42,10 @@ namespace ProjetoVendas.Service
             {
                 var produto = await _appDbContext.Produtos.FirstOrDefaultAsync(x => x.Id == atualizarProduto.Id);
                 _appDbContext.Entry(produto).State = EntityState.Modified;
-                AtualizarProduto(produto,atualizarProduto);
+
+                var atualizarP = new AtualizacaoDoProduto();
+                atualizarP.AtualizarProduto(produto,atualizarProduto)
+                    ;
                 await Task.FromResult(_appDbContext.Set<Produto>().Update(produto));
                 await _appDbContext.SaveChangesAsync();
             }
@@ -87,19 +93,6 @@ namespace ProjetoVendas.Service
             {
                 throw new Exception("Ops! Algo deu errado no momento de excluir o produto: " + exception.Message);
             }
-        }
-
-        public bool ValidarCaracteristicas(AdicionarProduto adicionarProduto) {
-
-            if (adicionarProduto.Descricao.Length <= 200 && adicionarProduto.Valor >= 0 && adicionarProduto.QuantidadeNoStoque > 0)
-                return true;
-            else
-                return false;
-
-        }
-
-        public void AtualizarProduto(Produto produto,AtualizarProduto atualizarProduto) {
-            produto.AddNewProduto(atualizarProduto.Descricao,atualizarProduto.Valor, atualizarProduto.QuantidadeNoEstoque);
         }
     }
 }

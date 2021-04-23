@@ -1,56 +1,72 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using ProjetoVendas.Infra;
-using ProjetoVendas.Resquest.Usuario;
-using ProjetoVendas.Service;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using ProjetoVendas.Resquest.Produto;
+using ProjetoVendas.Service.Interfaces.Crud.Produtos;
+using ProjetoVendas.Service.Interfaces.Crud.Produtos.ProdutoObterTodos;
+using ProjetoVendas.Service.Interfaces.Crud.Produtos.ProdutoRemover;
 
 namespace ProjetoVendas.Controllers
 {
 
     [ApiController]
     [Route("[controller]")]
-    public class UsuarioController : Controller
+    public class ProdutoController : Controller
     {
-        private readonly ILogger<UsuarioController> _logger;
-        private readonly AppDbContext _appDbContext;
+        private readonly ILogger<ProdutoController> _logger;
+        private readonly AppDbContext _Context;
+        private readonly IProdutoAdicionar _produtoAdd;
+        private readonly IProdutoAtualizar _produtoUpdate;
+        private readonly IProdutoObterPorId _produtoGetId;
+        private readonly IProdutoObterTodos _produtoGetTodos;
+        private readonly IProdutoRemover _produtoDelete;
 
-        public UsuarioController(ILogger<UsuarioController> logger, AppDbContext appDbContext)
+        public ProdutoController(ILogger<ProdutoController> logger, AppDbContext appDbContext,
+            IProdutoAdicionar produtoAdicionar,IProdutoAtualizar produtoAtualizar,IProdutoObterPorId produtoObterPorId,
+            IProdutoObterTodos produtoObterTodos,IProdutoRemover produtoRemover
+            )
         {
-            _appDbContext = appDbContext;
+            _Context = appDbContext;
             _logger = logger;
+            _produtoAdd = produtoAdicionar;
+            _produtoUpdate = produtoAtualizar;
+            _produtoGetId = produtoObterPorId;
+            _produtoGetTodos = produtoObterTodos;
+            _produtoDelete = produtoRemover;
+
         }
 
         [HttpPost]
-        public async Task<IActionResult> Adicionar([FromBody] AdicionarUsuario adicionarUsuario)
+        public async Task<IActionResult> Adicionar([FromBody] AdicionarProduto adicionarProduto)
         {
             // recebo a requisição e passo a responsabilidade de fazer a lógica de adicionar para outra classe (Princípio da Responsabilidade única (SOLID))
             // os metodos do controller não tem de ter muito código. basicamente uma linha que repassa a requisição pra outra classe fazer o cadastro
-            // e outra linha que retorna a reposta para o frontend
-            try { 
-                Guid id = await new UsuarioService(_appDbContext).Adicionar(adicionarUsuario);
-                return CreatedAtAction(nameof(Obter), id);
-            }
+            // e outra linha que retorna a reposta para o frontend            
+            try {
+            Guid id = await _produtoAdd.Adicionar(adicionarProduto);
+            return CreatedAtAction(nameof(Obter), id);
+            } 
             catch {
                 return NotFound();
             }
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Atualizar(Guid id, [FromBody] AtualizarUsuario atualizarUsuario)
+        public async Task<IActionResult> Atualizar(Guid id, [FromBody] AtualizarProduto atualizarProduto)
         {
             // recebo a requisição e passo a responsabilidade de fazer a lógica de adicionar para outra classe (Princípio da Responsabilidae única (SOLID))
             // os metodos do controller não tem de ter muito código. basicamente uma linha que repassa a requisição pra outra classe fazer a trativa
             // e outra linha que retorna a reposta para o frontend
-            try { 
-                atualizarUsuario.ObterId(id);
-                await new UsuarioService(_appDbContext).Atualizar(atualizarUsuario);
+            try
+            {
+                atualizarProduto.ObterId(id);
+                await _produtoUpdate.Atualizar(atualizarProduto);
                 return NoContent();
-
-            } catch {
+            }
+            catch (Exception)
+            {
                 return NotFound();
             }
         }
@@ -61,14 +77,15 @@ namespace ProjetoVendas.Controllers
             // recebo a requisição e passo a responsabilidade de fazer a lógica de adicionar para outra classe (Princípio da Responsabilidae única (SOLID))
             // os metodos do controller não tem de ter muito código. basicamente uma linha que repassa a requisição pra outra classe fazer a trativa
             // e outra linha que retorna a reposta para o frontend
-
-            try { 
-                await new UsuarioService(_appDbContext).Remover(id);
+            try
+            {
+                await _produtoDelete.Remover(id);
                 return NoContent();
-            } 
-            catch {
+            }
+            catch (Exception) {
                 return NotFound();
             }
+
         }
 
         [HttpGet]
@@ -78,8 +95,9 @@ namespace ProjetoVendas.Controllers
             // metodos do controller não tem de ter lógica, basicamente uma linha que repassa a requisição pra outra classe fazer a trativa
             try
             {
-                var usuarios = await new UsuarioService(_appDbContext).ObterTodos();
-                return Ok(usuarios);
+                var produtos = await _produtoGetTodos.ObterTodos();
+                return Ok(produtos);
+
             }
             catch (Exception)
             {
@@ -94,13 +112,13 @@ namespace ProjetoVendas.Controllers
             // metodos do controller não tem de ter lógica, basicamente uma linha que repassa a requisição pra outra classe fazer a trativa
             try
             {
-            var usuario = await new UsuarioService(_appDbContext).ObterPorId(id);
-            return Ok(usuario);
+                var produto = await _produtoGetId.ObterId(id);
+                return Ok(produto);
             }
-            catch (Exception)
-            {
+            catch (Exception) {
                 return NotFound();
             }
+
         }
     }
 }

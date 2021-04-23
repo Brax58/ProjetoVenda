@@ -1,12 +1,9 @@
 ﻿using ProjetoVendas.Resquest.Usuario;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using ProjetoVendas.Service.Interfaces.Validar;
 
 namespace ProjetoVendas.Service.Validacao
 {
-    public class ValidarUsuario
+    public class ValidarUsuario : IValidarUsuario
     {
         public bool ValidarCaracteristicas(AdicionarUsuario adicionarUsuario)
         {

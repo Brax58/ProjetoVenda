@@ -1,13 +1,10 @@
 ﻿using ProjetoVendas.Entities;
 using ProjetoVendas.Resquest.Produto;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using ProjetoVendas.Service.Interfaces.Atualizar;
 
 namespace ProjetoVendas.Service.AtualizacaoDasEntidades
 {
-    public class AtualizacaoDoProduto
+    public class AtualizacaoDoProduto : IAtualizacaoDoProduto
     {
         public void AtualizarProduto(Produto produto, AtualizarProduto atualizarProduto)
         {

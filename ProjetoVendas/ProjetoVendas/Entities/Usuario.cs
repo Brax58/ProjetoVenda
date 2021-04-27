@@ -13,14 +13,16 @@ namespace ProjetoVendas.Entities
         public string Email{ get; private set; }
         public string DataDeNascimento{ get; private set; }
         public string Cpf { get; private set; }
+        public bool Ativo { get; private set; }
 
-        
+
         public Usuario(string nome,string email,string cpf,string dataDeNascimento)
         {
             Nome = nome;
             Email = email;
             Cpf = cpf;
             DataDeNascimento = dataDeNascimento;
+            Ativo = true;
         }
 
 
@@ -28,6 +30,11 @@ namespace ProjetoVendas.Entities
         {
             Nome = nome;
             SetAtivo(ativo);
+        }
+
+        internal void SetAtivo(bool ativo)
+        {
+            Ativo = ativo;
         }
 
     }

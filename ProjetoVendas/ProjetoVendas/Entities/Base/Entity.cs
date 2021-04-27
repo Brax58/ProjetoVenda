@@ -7,18 +7,13 @@ namespace ProjetoVendas.Entities.Base
 {
     public abstract class Entity
     {
+        
         public Guid Id { get; private set; }
-        public bool Ativo { get; private set; }
         public DateTime DataCadastro { get; private set; }
 
         protected Entity(){
             Id = Guid.NewGuid();
             DataCadastro = DateTime.Now;
-            Ativo = true;
-        }
-
-        internal void SetAtivo(bool ativo) {
-            Ativo = ativo;
         }
 
     }

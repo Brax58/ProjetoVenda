@@ -16,6 +16,8 @@ namespace ProjetoVendas.Infra
 
         public DbSet<Produto> Produtos { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<Pedido> Pedidos{ get; set; }
+        public DbSet<PedidoProduto> PedidoProdutos { get; set; }
 
     }
 }

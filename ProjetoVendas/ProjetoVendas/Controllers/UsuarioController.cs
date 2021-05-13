@@ -50,7 +50,6 @@ namespace Api.Controllers
             // recebo a requisição e passo a responsabilidade de fazer a lógica de adicionar para outra classe (Princípio da Responsabilidade única (SOLID))
             // os metodos do controller não tem de ter muito código. basicamente uma linha que repassa a requisição pra outra classe fazer o cadastro
             // e outra linha que retorna a reposta para o frontend
-            try {
                 var validar = _validarUsuario.Validate(adicionarUsuario);
 
                 if (!validar.IsValid) {
@@ -59,10 +58,6 @@ namespace Api.Controllers
 
                 Guid id = await _usuarioAdd.Adicionar(adicionarUsuario);
                 return CreatedAtAction(nameof(Obter), id);
-            }
-            catch {
-                return BadRequest();
-            }
         }
 
         #endregion
